@@ -67,10 +67,10 @@ echo "COSMOS_KEY: $COSMOS_KEY"
 
 # ==== DB へデータ投入 ====
 echo "# --- PostgreSQL テーブル作成＆CSV投入 ---"
-python ./infra/import_csv_to_postgres.py "$PG_HOST" "$PG_DB_NAME" "$PG_ADMIN_USER" "$PG_ADMIN_PASS" "./infra/sample_data/csv"
+python ./infra/sample_data/import_csv_to_postgres.py "$PG_HOST" "$PG_DB_NAME" "$PG_ADMIN_USER" "$PG_ADMIN_PASS" "./infra/sample_data/csv"
 
 echo "# --- Cosmos DB (NoSQL) へtweets.json投入 ---"
-python ./infra/import_jsonl_to_cosmos.py "$COSMOS_URI" "$COSMOS_KEY" "$COSMOS_DB_NAME" "$COSMOS_CONTAINER_NAME" "./infra/sample_data/jsonl"
+python ./infra/sample_data/import_jsonl_to_cosmos.py "$COSMOS_URI" "$COSMOS_KEY" "$COSMOS_DB_NAME" "$COSMOS_CONTAINER_NAME" "./infra/sample_data/jsonl"
 
 echo "done"
 echo "== 準備完了！=="
