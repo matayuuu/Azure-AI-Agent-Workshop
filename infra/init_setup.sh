@@ -3,20 +3,17 @@
 set -e
 
 # ===== 変数定義 =====
-RESOURCE_GROUP_NAME="azure-ai-agent-workshop"
+RANDOM_INT=$(shuf -i 1-9999 -n 1)
+RESOURCE_GROUP_NAME="azure-ai-agent-workshop-$RANDOM_INT"
 LOCATION="westus"                     
-PG_SERVER_NAME="pgserver"
+PG_SERVER_NAME="pgserver-$RANDOM_INT"
 PG_DB_NAME="ecdb"
 PG_ADMIN_USER="ecadmin"
 PG_ADMIN_PASS="YourP@ssword123!"         
-COSMOS_ACCOUNT_NAME="cosmos"
+COSMOS_ACCOUNT_NAME="cosmos-$RANDOM_INT"
 COSMOS_DB_NAME="twitterdb"
 COSMOS_CONTAINER_NAME="tweets"
 COSMOS_PARTITION_KEY="/tweet_id"
-
-# Python依存パッケージのインストール
-echo "== pip install dependencies =="
-pip install -r ./requirements.txt
 
 # ===== リソースグループ作成 =====
 echo "== リソースグループ作成 =="

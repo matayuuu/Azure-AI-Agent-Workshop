@@ -47,7 +47,7 @@ def main(pg_host, pg_db, pg_user, pg_pass, csv_dir):
             insert_sql = f'INSERT INTO "{table_name}" ({col_names}) VALUES ({placeholders})'
             cursor.execute(insert_sql, tuple(row))
         conn.commit()
-        print(f'Inserted or Replaced {len(df)} rows into {table_name}')
+        print(f'Inserted {len(df)} rows into {table_name}')
 
     cursor.close()
     conn.close()
