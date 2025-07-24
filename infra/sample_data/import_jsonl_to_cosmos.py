@@ -14,7 +14,6 @@ def main(endpoint, key, db_name, container_name, jsonl_dir):
     )
 
     # --- 1. 既存全データ削除（全件削除） ---
-    # --- 1. 既存全データ削除（全件削除） ---
     print("Deleting all existing documents in container for truncate-insert...")
     deleted = 0
     skipped = 0

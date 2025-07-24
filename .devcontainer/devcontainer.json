@@ -1,18 +1,14 @@
 {
   "name": "Python 3.11 Dev Container",
-  // "build": {
-  //   "dockerfile": "Dockerfile"
-  // },
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
   "features": {
     "ghcr.io/devcontainers/features/azure-cli:1": {}, //  Azure CLI
     "ghcr.io/itsmechlark/features/postgresql:1": {}, //  psql
-    // "ghcr.io/devcontainers-extra/features/mongosh-homebrew:1": {} //  mongo
   },
   "customizations": {
     "vscode": {
       "settings": {},
-      "extensions": ["ms-python.python", "ms-toolsai.jupyter"]
+      "extensions": ["ms-python.python", "ms-toolsai.jupyter", "ms-azuretools.vscode-bicep"]
     }
   }
 }
