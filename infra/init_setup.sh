@@ -3,17 +3,20 @@
 set -e
 
 # ===== 変数定義 =====
-RANDOM_INT=$(shuf -i 1-9999 -n 1)
-RESOURCE_GROUP_NAME="azure-ai-agent-workshop-$RANDOM_INT"
-LOCATION="japaneast"                     # 必要に応じて変更
-PG_SERVER_NAME="pgserver$RANDOM_INT"
+RESOURCE_GROUP_NAME="azure-ai-agent-workshop"
+LOCATION="westus"                     
+PG_SERVER_NAME="pgserver"
 PG_DB_NAME="ecdb"
 PG_ADMIN_USER="ecadmin"
-PG_ADMIN_PASS="YourP@ssword123!"         # 必ず変更！
-COSMOS_ACCOUNT_NAME="cosmos$RANDOM_INT"
+PG_ADMIN_PASS="YourP@ssword123!"         
+COSMOS_ACCOUNT_NAME="cosmos"
 COSMOS_DB_NAME="twitterdb"
 COSMOS_CONTAINER_NAME="tweets"
-COSMOS_PARTITION_KEY="/tweet_id"         # 必要に応じて変更
+COSMOS_PARTITION_KEY="/tweet_id"
+
+# Python依存パッケージのインストール
+echo "== pip install dependencies =="
+pip install -r ./requirements.txt
 
 # ===== リソースグループ作成 =====
 echo "== リソースグループ作成 =="
@@ -29,7 +32,7 @@ while true; do
   sleep 30
 done
 
-# ===== PostgreSQL Flexible Server作成（割愛したい場合はコメントアウト） =====
+# ===== PostgreSQL Flexible Server作成 =====
 echo "== PostgreSQL Flexible Server作成 =="
 az postgres flexible-server create \
   --name $PG_SERVER_NAME \
@@ -93,24 +96,12 @@ PG_HOST=$(az postgres flexible-server show \
 
 echo "PostgreSQL HOST: $PG_HOST"
 
-echo ""
-echo "== 次の手順でDB・コンテナにデータ投入 =="
-
+# ===== DB・コンテナにデータ投入 =====
 echo "# --- PostgreSQL テーブル作成＆CSV投入 ---"
-echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -f create_tables.sql"
-echo ""
+python ./infra/import_csv_to_postgres.py "$PG_HOST" "$PG_DB_NAME" "$PG_ADMIN_USER" "$PG_ADMIN_PASS" "./infra/sample_data/csv"
 
 echo "# --- Cosmos DB (NoSQL) へtweets.json投入 ---"
-echo "## tweets.json（複数件: JSON Lines形式）を1件ずつループで登録"
-echo ""
-echo "for row in \$(cat ./sample_data/jsonl/tweets.jsonl); do"
-echo "  az cosmosdb sql container item create \\"
-echo "    --account-name $COSMOS_ACCOUNT_NAME \\"
-echo "    --database-name $COSMOS_DB_NAME \\"
-echo "    --container-name $COSMOS_CONTAINER_NAME \\"
-echo "    --resource-group $RESOURCE_GROUP_NAME \\"
-echo "    --partition-key \$(echo \$row | jq -r .tweet_id) \\"
-echo "    --body \"\$row\""
+python ./infra/import_jsonl_to_cosmos.py "$COSMOS_URI" "$COSMOS_KEY" "$COSMOS_DB_NAME" "$COSMOS_CONTAINER_NAME" "./infra/sample_data/jsonl"
+
 echo "done"
-echo ""
 echo "== 準備完了！=="

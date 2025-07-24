@@ -11,26 +11,12 @@
 
 4. python 3.11 系が使える状態で、環境が立ち上がります。仮想環境作成や依存関係のインストールを行っていきます。
 
-5. python のバージョン確認
+5. python や CLI ツールのバージョン確認
     ```
     python --version
+    psql --version
+    az --version
     ```
-
-6. 依存関係のインストール
-    ```
-    pip install -r ./requirements.txt
-    ```
-
-7. Azure へのログイン
-    ```
-    az login --use-device-code
-    ```
-
-8. `.env-sample`をコピーし、同じ階層に `.env`ファイルとして保存
-    ```
-    cp .env-sample .env
-    ```
-
 
 
 
@@ -60,31 +46,29 @@
         └── sk-multiagent.ipynb Semantic Kernel を勉強するノートブック
 ```
 
-## Azure AI Foundry Project の作成
-ターミナルを開いて、以下を順次実行。
-1. 変数の設定
-    ```sh
-    RANDOM_INT=$(shuf -i 1-9999 -n 1)
-    RESOURCE_GROUP_NAME="azure-ai-agent-workshop-$RANDOM_INT"
-    LOCATION="westus"
+## インフラ構築
+1. 依存関係のインストール
+    ```
+    pip install -r ./requirements.txt
     ```
 
-2. ユーザーログイン
-    ```sh
+2. Azure へのログイン
+    ```
     az login --use-device-code
     ```
 
-3. リソースグループ作成
+3. シェルスクリプトの実行
     ```sh
-    az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
+    bash ./infra/init_setup.sh
     ```
 
-4. [Deploy to Azure by Basic Setup](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure-ai-foundry%2Ffoundry-samples%2Frefs%2Fheads%2Fmain%2Fsamples%2Fmicrosoft%2Finfrastructure-setup%2F40-basic-agent-setup%2Fbasic-setup.json) をクリックすることで Azure Portal のカスタムデプロイ画面に遷移。以下のパラメータを入力し、[**確認と作成**] を押下。
+## Azure AI Foundry Project の作成
+1. [Deploy to Azure by Basic Setup](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure-ai-foundry%2Ffoundry-samples%2Frefs%2Fheads%2Fmain%2Fsamples%2Fmicrosoft%2Finfrastructure-setup%2F40-basic-agent-setup%2Fbasic-setup.json) をクリックすることで Azure Portal のカスタムデプロイ画面に遷移。以下のパラメータを入力し、[**確認と作成**] を押下。
 
 
     ![alt text](./images/image-00-02.png)
 
-5. Foundry Project の作成が完了すると、[**リソースグループに移動**] を押下し、リソースが作成されたことを確認
+2. Foundry Project の作成が完了すると、[**リソースグループに移動**] を押下し、リソースが作成されたことを確認
 
     ![alt text](./images/image-00-03.png)
 
