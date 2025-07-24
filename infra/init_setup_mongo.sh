@@ -12,14 +12,13 @@ PG_ADMIN_USER="ecadmin"
 PG_ADMIN_PASS="YourP@ssword123!"         # 必ず変更！
 COSMOS_ACCOUNT_NAME="cosmos$RANDOM_INT"
 COSMOS_DB_NAME="twitterdb"
-COSMOS_CONTAINER_NAME="tweets"
-COSMOS_PARTITION_KEY="/tweet_id"         # 必要に応じて変更
+COSMOS_COLLECTION_NAME="tweets"
 
 # ===== リソースグループ作成 =====
 echo "== リソースグループ作成 =="
 az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
 
-# ===== Cosmos DBプロバイダー登録＆完了待ち =====
+# ===== Cosmos DBリソースプロバイダー登録＆完了待ち =====
 echo "== Cosmos DBプロバイダーの登録 =="
 az provider register --namespace Microsoft.DocumentDB
 while true; do
@@ -29,7 +28,7 @@ while true; do
   sleep 30
 done
 
-# ===== PostgreSQL Flexible Server作成（割愛したい場合はコメントアウト） =====
+# ===== PostgreSQL Flexible Server作成 =====
 echo "== PostgreSQL Flexible Server作成 =="
 az postgres flexible-server create \
   --name $PG_SERVER_NAME \
@@ -43,6 +42,7 @@ az postgres flexible-server create \
   --version 15 \
   --public-access Enabled
 
+# FWルール（全開放・検証用途のみ！本番はIP制限推奨）
 az postgres flexible-server firewall-rule create \
   --resource-group $RESOURCE_GROUP_NAME \
   --name $PG_SERVER_NAME \
@@ -50,40 +50,37 @@ az postgres flexible-server firewall-rule create \
   --start-ip-address 0.0.0.0 \
   --end-ip-address 255.255.255.255
 
-# ===== Cosmos DB for NoSQL 作成 =====
-echo "== Cosmos DB for NoSQL 作成 =="
+# ===== Cosmos DB (MongoDB API)作成 =====
+echo "== Cosmos DB for MongoDB作成 =="
 az cosmosdb create \
   --name $COSMOS_ACCOUNT_NAME \
   --resource-group $RESOURCE_GROUP_NAME \
   --locations regionName=$LOCATION failoverPriority=0 \
-  --kind GlobalDocumentDB
+  --capabilities EnableMongo \
+  --kind MongoDB
 
-# データベース作成
-az cosmosdb sql database create \
+# Cosmos DBデータベース作成
+az cosmosdb mongodb database create \
   --account-name $COSMOS_ACCOUNT_NAME \
   --resource-group $RESOURCE_GROUP_NAME \
   --name $COSMOS_DB_NAME
 
-# コンテナ（コレクション）作成
-az cosmosdb sql container create \
+# Cosmos DBコレクション作成
+az cosmosdb mongodb collection create \
   --account-name $COSMOS_ACCOUNT_NAME \
   --resource-group $RESOURCE_GROUP_NAME \
   --database-name $COSMOS_DB_NAME \
-  --name $COSMOS_CONTAINER_NAME \
-  --partition-key-path $COSMOS_PARTITION_KEY \
+  --name $COSMOS_COLLECTION_NAME \
   --throughput 400
 
-# ===== Cosmos DB (NoSQL) のキー取得 =====
-COSMOS_KEY=$(az cosmosdb keys list \
+# ===== Cosmos DB (MongoDB) 接続文字列の取得 =====
+COSMOS_CONN_STR=$(az cosmosdb keys list \
   --name $COSMOS_ACCOUNT_NAME \
   --resource-group $RESOURCE_GROUP_NAME \
-  --type keys \
-  --query "primaryMasterKey" -o tsv)
+  --type connection-strings \
+  --query "connectionStrings[0].connectionString" -o tsv)
 
-COSMOS_URI="https://${COSMOS_ACCOUNT_NAME}.documents.azure.com:443/"
-
-echo "Cosmos NoSQL URI: $COSMOS_URI"
-echo "Cosmos NoSQL KEY: $COSMOS_KEY"
+echo "Cosmos MongoDB URI: $COSMOS_CONN_STR"
 
 # ===== PostgreSQLサーバーFQDNの取得 =====
 PG_HOST=$(az postgres flexible-server show \
@@ -94,23 +91,19 @@ PG_HOST=$(az postgres flexible-server show \
 echo "PostgreSQL HOST: $PG_HOST"
 
 echo ""
-echo "== 次の手順でDB・コンテナにデータ投入 =="
+echo "== 次の手順でDB・コレクションにデータ投入 =="
 
 echo "# --- PostgreSQL テーブル作成＆CSV投入 ---"
 echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -f create_tables.sql"
+echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -c \"\\copy categories FROM './sample_data/csv/categories.csv' CSV HEADER;\""
+echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -c \"\\copy products FROM './sample_data/csv/products.csv' CSV HEADER;\""
+echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -c \"\\copy inventory FROM './sample_data/csv/inventory.csv' CSV HEADER;\""
+echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -c \"\\copy users FROM './sample_data/csv/users.csv' CSV HEADER;\""
+echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -c \"\\copy orders FROM './sample_data/csv/orders.csv' CSV HEADER;\""
+echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -c \"\\copy order_details FROM './sample_data/csv/order_details.csv' CSV HEADER;\""
+echo "psql -h $PG_HOST -U $PG_ADMIN_USER -d $PG_DB_NAME -c \"\\copy shipping_status FROM './sample_data/csv/shipping_status.csv' CSV HEADER;\""
 echo ""
-
-echo "# --- Cosmos DB (NoSQL) へtweets.json投入 ---"
-echo "## tweets.json（複数件: JSON Lines形式）を1件ずつループで登録"
-echo ""
-echo "for row in \$(cat ./sample_data/jsonl/tweets.jsonl); do"
-echo "  az cosmosdb sql container item create \\"
-echo "    --account-name $COSMOS_ACCOUNT_NAME \\"
-echo "    --database-name $COSMOS_DB_NAME \\"
-echo "    --container-name $COSMOS_CONTAINER_NAME \\"
-echo "    --resource-group $RESOURCE_GROUP_NAME \\"
-echo "    --partition-key \$(echo \$row | jq -r .tweet_id) \\"
-echo "    --body \"\$row\""
-echo "done"
+echo "# --- Cosmos DB (MongoDB) へtweets.json投入 ---"
+echo "mongoimport --uri \"$COSMOS_CONN_STR\" --collection $COSMOS_COLLECTION_NAME --file ./sample_data/json/tweets.json --jsonArray"
 echo ""
 echo "== 準備完了！=="
