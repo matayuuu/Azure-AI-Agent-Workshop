@@ -1,6 +1,8 @@
-# Azure AI Foundry Agent Service 演習
+# Azure AI Foundry Agent Service
+## 01_azure_ai_foundry_agent_service_singleagent
 1.  シングルエージェント
     - MCP ツールを操作 (MicrosoftDocs)
+## 02_azure_ai_foundry_agent_service_multiagent
 2.  Connected Agents でマルチエージェントを作成
 3. （参考）Deep Research Tool
 

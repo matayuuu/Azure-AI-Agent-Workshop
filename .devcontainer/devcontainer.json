@@ -2,12 +2,14 @@
   "name": "Python 3.11 Dev Container",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
   "features": {
-    "ghcr.io/devcontainers/features/azure-cli:1": {}
+    "ghcr.io/devcontainers/features/azure-cli:1": {}, //  Azure CLI
+    "ghcr.io/devcontainers/features/postgres-client:1": {}, //  psql
+    "ghcr.io/devcontainers/features/mongodb-tools:1": {}, //  mongo
   },
   "customizations": {
     "vscode": {
       "settings": {},
-      "extensions": ["ms-python.python"]
+      "extensions": ["ms-python.python", "ms-toolsai.jupyter"]
     }
   }
 }

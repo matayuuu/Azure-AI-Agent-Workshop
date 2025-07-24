@@ -21,17 +21,12 @@
     pip install -r ./requirements.txt
     ```
 
-7. Azure CLI のインストール
-    ```
-    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    ```
-
-8. Azure へのログイン
+7. Azure へのログイン
     ```
     az login --use-device-code
     ```
 
-9. `.env-sample`をコピーし、同じ階層に `.env`ファイルとして保存
+8. `.env-sample`をコピーし、同じ階層に `.env`ファイルとして保存
     ```
     cp .env-sample .env
     ```
