@@ -1,5 +1,4 @@
 # Azure AI Agent Workshop Setup
-# 開発環境の準備
 ## Github Codespaces の起動
 1. https://github.com/matayuuu/Azure-AI-Agent-Workshop にアクセスし、main ブランチであることを確認
 
