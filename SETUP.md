@@ -15,11 +15,6 @@
     az --version
     ```
 
-4. `.env-sample` をコピーし、同じ階層に `.env` ファイルとして保存
-    ```sh
-    cp .env-sample .env
-    ```
-
 
 ## （仮）ディレクトリの構造について
 今回のハンズオンのディレクトリ構造は下記の通りです。
@@ -27,12 +22,7 @@
 ```
 
 ## インフラ構築
-1. 依存関係のインストール
-    ```sh
-    pip install -r ./requirements.txt
-    ```
-
-2. Azure へのログイン
+1. Azure へのログイン
     ```sh
     az login --use-device-code
     ```

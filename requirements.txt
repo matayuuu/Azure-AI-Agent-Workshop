@@ -8,3 +8,6 @@ azure-ai-agents==1.1.0b4 # MCPTool 対応バージョン
 azure-identity==1.23.1
 
 semantic-kernel==1.35.0
+
+asyncpg==0.30.0
+fastmcp==2.10.6
