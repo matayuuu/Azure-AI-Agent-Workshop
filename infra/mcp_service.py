@@ -10,18 +10,18 @@ load_dotenv()
 
 # PostgreSQL 接続情報
 PG_CONFIG = {
-    "user": os.getenv("PGUSER"),
-    "password": os.getenv("PGPASSWORD"),
-    "database": os.getenv("PGDATABASE"),
-    "host": os.getenv("PGHOST"),
+    "user": os.getenv("PG_USER"),
+    "password": os.getenv("PG_PASS"),
+    "database": os.getenv("PG_DB"),
+    "host": os.getenv("PG_HOST"),
     "port": int(os.getenv("PGPORT", 5432)),
 }
 
 # CosmosDB 接続情報
 COSMOS_ENDPOINT = os.getenv("COSMOS_ENDPOINT")
 COSMOS_KEY = os.getenv("COSMOS_KEY")
-COSMOS_DB_NAME = os.getenv("COSMOS_DB_NAME", "twitterdb")
-COSMOS_CONTAINER_NAME = os.getenv("COSMOS_CONTAINER_NAME", "tweets")
+COSMOS_DB_NAME = os.getenv("COSMOS_DB", "twitterdb")
+COSMOS_CONTAINER_NAME = os.getenv("COSMOS_CONTAINER", "tweets")
 
 # MCP サーバ定義
 mcp = FastMCP(

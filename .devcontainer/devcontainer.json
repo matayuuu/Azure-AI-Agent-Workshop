@@ -4,6 +4,7 @@
   "features": {
     "ghcr.io/devcontainers/features/azure-cli:1": {}, //  Azure CLI
     "ghcr.io/itsmechlark/features/postgresql:1": {}, //  psql
+    "ghcr.io/devcontainers/features/node:1": {"version": "22"} // Node.js
   },
   "customizations": {
     "vscode": {
