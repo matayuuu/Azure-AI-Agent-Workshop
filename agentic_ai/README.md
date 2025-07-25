@@ -1,30 +1,36 @@
-# Azure AI Foundry Agent Service
-## 01_azure_ai_foundry_agent_service_singleagent
+# 構成
+## Azure AI Foundry Agent Service
+### 01_foundry_agent_service_single_agent
 1.  シングルエージェント
     - MCP ツールを操作 (MicrosoftDocs)
-## 02_azure_ai_foundry_agent_service_multiagent
-2.  Connected Agents でマルチエージェントを作成
-3. （参考）Deep Research Tool
+    - （参考）Deep Research Tool
 
-# Memo
-- BingSearch
+### 02_foundry_agent_service_multi_agent
+1.  Connected Agents でマルチエージェントを作成
+
+### Memo
+- BingSearch どうしようか
 ---
 
-# Semancit Kernel 演習
+## Semancit Kernel 演習
+### 03_sk_agent_framework
 1. シングルエージェント
     - ChatCompletionAgent
     - AzureAIAgent
 2. マルチエージェント（Plugin）
-3. マルチエージェント・オーケストレーション
-    - Handoffs
-    - GroupChat - RoundRobin(競争型)
-    - GroupChat - 
-    - Magentic
-4. プロセスフレームワーク
-    - 概念および概要説明
-    - シーケンス
 
-# Memo
+### 04_sk_multi_agent_orchestration
+1. Handoffs
+2. GroupChat - RoundRobin(競争型)
+3. GroupChat - 
+4. Magentic
+
+### 05_sk_process_framework
+1. 概念および概要説明
+2. 各パターン紹介
+3. 実践（シーケンスで Deep Research with MicrosftDocs）
+
+## Memo
 - メモリー機能実装
 - ツールの動的取得
 - トレース
@@ -50,3 +56,7 @@
 # 結論
 - まずは Azure AI Foundry Agent Service でシングルエージェントで対応
 - マルチエージェントへ拡張する必要性があれば OSS フレームワークを検討
+
+---
+最後にやること
+- GPT4.1 の TPM を 50 にアップグレード！
