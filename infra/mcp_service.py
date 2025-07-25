@@ -3,6 +3,7 @@ import json
 import asyncio
 import asyncpg
 from dotenv import load_dotenv
+from datetime import datetime
 from fastmcp import FastMCP
 from azure.cosmos import CosmosClient
 
@@ -115,31 +116,60 @@ async def get_tweet_count() -> str:
     count = container.query_items("SELECT VALUE COUNT(1) FROM c", enable_cross_partition_query=True)
     return to_json({"count": list(count)[0]})
 
-@mcp.tool(description="tweet_idでツイートを検索")
-async def get_tweet_by_id(tweet_id: str) -> str:
-    container = get_cosmos_container()
-    items = container.query_items(
-        query="SELECT * FROM c WHERE c.tweet_id = @tweet_id",
-        parameters=[{"name": "@tweet_id", "value": tweet_id}],
-        enable_cross_partition_query=True
-    )
-    return to_json(list(items))
-
 @mcp.tool(description="ユーザーごとのツイート数ランキング（上位10件）")
 async def get_top_users_by_tweet() -> str:
     container = get_cosmos_container()
-    query = """
-    SELECT c.user.screen_name AS screen_name, COUNT(1) AS tweet_count
-    FROM c
-    GROUP BY c.user.screen_name
-    ORDER BY tweet_count DESC
-    OFFSET 0 LIMIT 10
-    """
-    items = container.query_items(query, enable_cross_partition_query=True)
-    return to_json(list(items))
+    # 必要な情報だけ取得
+    query = "SELECT c.user.screen_name AS screen_name FROM c"
+    items = list(container.query_items(query, enable_cross_partition_query=True))
+    # Pythonで集計
+    from collections import Counter
+    counts = Counter(item["screen_name"] for item in items if item.get("screen_name"))
+    # ランキング形式で返す
+    top10 = [{"screen_name": name, "tweet_count": count} for name, count in counts.most_common(10)]
+    return to_json(top10)
+
 
 # さらに必要に応じて CosmosDB のパーティションキーや特定フィールドで集計・分析系ツールも追加できます
 
+@mcp.tool(description="指定期間でツイートの多かった商品ランキング（上位10件）")
+async def get_top_products_by_tweets_period(
+    start_date: str,  # "YYYY-MM-DD" 形式
+    end_date: str     # "YYYY-MM-DD" 形式
+) -> str:
+    container = get_cosmos_container()
+    # ISO8601 文字列（例："2025-07-01T00:00:00Z"）に変換
+    start_iso = datetime.fromisoformat(start_date).strftime("%Y-%m-%dT00:00:00Z")
+    end_iso = datetime.fromisoformat(end_date).strftime("%Y-%m-%dT23:59:59Z")
+    # クエリ発行
+    query = """
+    SELECT c.product_id, c.product_name, c.created_at
+    FROM c
+    WHERE c.created_at >= @start AND c.created_at <= @end
+    """
+    items = list(container.query_items(
+        query=query,
+        parameters=[
+            {"name": "@start", "value": start_iso},
+            {"name": "@end", "value": end_iso}
+        ],
+        enable_cross_partition_query=True
+    ))
+    # 商品ごとに集計
+    from collections import Counter
+    key = lambda x: x.get("product_id") or x.get("product_name")
+    counts = Counter(key(item) for item in items if key(item))
+    # 上位10件
+    top10 = []
+    for pid, count in counts.most_common(10):
+        product_name = next((item.get("product_name") for item in items if key(item) == pid), None)
+        top10.append({
+            "product_id": pid,
+            "product_name": product_name,
+            "tweet_count": count
+        })
+    return to_json(top10)
+
 # --- サーバ起動 ---
 if __name__ == "__main__":
-    asyncio.run(mcp.run_sse_async(host="0.0.0.0", port=8000))
+    asyncio.run(mcp.run(transport="http", host="0.0.0.0", port=8000))

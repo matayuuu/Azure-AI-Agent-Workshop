@@ -9,7 +9,7 @@ def main(endpoint, key, db_name, container_name, jsonl_dir):
     db = client.create_database_if_not_exists(db_name)
     container = db.create_container_if_not_exists(
         id=container_name,
-        partition_key=PartitionKey(path="/tweet_id"),
+        partition_key=PartitionKey(path="/user/screen_name"),  # ← パーティションキー変更
         offer_throughput=400
     )
 
@@ -18,7 +18,7 @@ def main(endpoint, key, db_name, container_name, jsonl_dir):
     deleted = 0
     skipped = 0
     for item in container.read_all_items():
-        pk = item.get("tweet_id")
+        pk = item.get("user", {}).get("screen_name")
         if pk is not None:
             container.delete_item(item, partition_key=pk)
             deleted += 1
@@ -33,14 +33,17 @@ def main(endpoint, key, db_name, container_name, jsonl_dir):
         with open(jsonl_file, "r", encoding="utf-8") as f:
             for line in f:
                 doc = json.loads(line)
-                # id必須
+                # id必須: idなければuuid生成
                 if "id" not in doc:
-                    doc["id"] = str(doc.get("tweet_id", str(uuid.uuid4())))
+                    doc["id"] = str(uuid.uuid4())
                 else:
                     doc["id"] = str(doc["id"])
-                # パーティションキーはstr
-                if "tweet_id" in doc:
-                    doc["tweet_id"] = str(doc["tweet_id"])
+                # パーティションキー(/user/screen_name)が必須
+                if "user" not in doc or "screen_name" not in doc["user"]:
+                    print(f"Skipped (no user.screen_name): {doc.get('id')}")
+                    continue
+                # screen_nameをstr化（念のため）
+                doc["user"]["screen_name"] = str(doc["user"]["screen_name"])
                 container.upsert_item(doc)
                 inserted += 1
         print(f"Inserted {inserted} docs from {jsonl_file}")
