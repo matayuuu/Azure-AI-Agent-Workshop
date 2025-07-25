@@ -26,13 +26,19 @@
     ```sh
     az login --use-device-code
     ```
-    
+
 2. 依存関係のインストール
+    今回使うライブラリを Codespaces 上の Python グローバル環境にインストールします。
     ```sh
     pip install -r ./requirements.txt
     ```
 
 3. シェルスクリプトの実行
+    今回利用する以下リソースを自動作成します。
+    - Azure AI Foundry
+    - Azure AI Foundry Project
+    - Azure Database for PostgreSQL 
+    - CosmosDB for NoSQL
     ```sh
     bash ./infra/init_setup.sh
     ```
@@ -54,3 +60,11 @@
 
     ![alt text](./images/image-00-05.png)
 
+## （参考）MCP サーバの動作確認
+[MCP Inspentor](https://github.com/modelcontextprotocol/inspector) を用いることで、Web UI 上で MCP サーバの動作確認ができます。
+
+以下のコマンドを実行すると Web UI がローカルホストに起動します。
+
+```sh
+npx @modelcontextprotocol/inspector
+```
