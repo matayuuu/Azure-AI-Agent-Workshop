@@ -6,3 +6,5 @@ python-dotenv==1.1.1
 azure-ai-projects==1.0.0b12
 azure-ai-agents==1.1.0b4 # MCPTool 対応バージョン
 azure-identity==1.23.1
+
+semantic-kernel==1.35.0

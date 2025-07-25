@@ -1,7 +1,7 @@
 #!/bin/bash
 
-set -x 
-# set -e # ログ出力（デバック時）
+# set -x # スクリプト内で実行されるコマンドを一行ずつ表示（デバッグ用）
+set -e # エラーが発生したらスクリプトを終了
 
 # ==== 変数定義 ====
 RANDOM_INT=$(shuf -i 1-9999 -n 1)
@@ -65,12 +65,43 @@ echo "PG_HOST: $PG_HOST"
 echo "COSMOS_URI: $COSMOS_URI"
 echo "COSMOS_KEY: $COSMOS_KEY"
 
+# ==== .env ファイル更新 ====
+# .envの特定のキーを書き換える関数
+update_env() {
+  local key=$1
+  local value=$2
+  # キーが存在すれば置換、なければ追加
+  if grep -q "^$key=" .env; then
+    sed -i.bak "s|^$key=.*|$key=\"$value\"|" .env
+  else
+    echo "$key=\"$value\"" >> .env
+  fi
+}
+
+update_env "AZURE_DEPLOYMENT_NAME" "$AI_MODEL_DEPLOYMENT_NAME"
+
+update_env "PG_HOST" "$PG_HOST"
+update_env "PG_USER" "$PG_ADMIN_USER"
+update_env "PG_DB" "$PG_DB_NAME"
+update_env "PG_PASS" "$PG_ADMIN_PASS"
+
+update_env "COSMOS_ENDPOINT" "$COSMOS_URI"
+update_env "COSMOS_KEY" "$COSMOS_KEY"
+update_env "COSMOS_DB" "$COSMOS_DB_NAME"
+update_env "COSMOS_CONTAINER" "$COSMOS_CONTAINER_NAME"
+
+
 # ==== DB へデータ投入 ====
 echo "# --- PostgreSQL テーブル作成＆CSV投入 ---"
-python ./infra/sample_data/import_csv_to_postgres.py "$PG_HOST" "$PG_DB_NAME" "$PG_ADMIN_USER" "$PG_ADMIN_PASS" "./infra/sample_data/csv"
+python ./infra/import_to_db_scripts/import_csv_to_postgres.py "$PG_HOST" "$PG_DB_NAME" "$PG_ADMIN_USER" "$PG_ADMIN_PASS" "./infra/sample_data/csv"
 
 echo "# --- Cosmos DB (NoSQL) へtweets.json投入 ---"
-python ./infra/sample_data/import_jsonl_to_cosmos.py "$COSMOS_URI" "$COSMOS_KEY" "$COSMOS_DB_NAME" "$COSMOS_CONTAINER_NAME" "./infra/sample_data/jsonl"
+python ./infra/import_to_db_scripts/import_jsonl_to_cosmos.py "$COSMOS_URI" "$COSMOS_KEY" "$COSMOS_DB_NAME" "$COSMOS_CONTAINER_NAME" "./infra/sample_data/jsonl"
+
+
+
+
+
 
 echo "done"
 echo "== 準備完了！=="
