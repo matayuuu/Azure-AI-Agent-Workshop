@@ -11,14 +11,12 @@ param cosmosDbName string
 param cosmosContainerName string
 param cosmosPartitionKey string
 param cosmosDbThroughput int
-
-// AI Foundry用
 param aiFoundryName string
 param aiProjectName string
 param aiModelDeploymentName string = 'gpt-4o'
 
 // ===== PostgreSQL Flexible Server =====
-resource pgServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
+resource pgServer 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: pgServerName
   location: location
   sku: {
@@ -36,14 +34,14 @@ resource pgServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview'
 }
 
 // ===== PostgreSQL DB作成 =====
-resource pgDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
+resource pgDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-01' = {
   parent: pgServer
   name: pgDbName
   properties: {}
 }
 
-// ===== FWルール（全開放） =====
-resource pgFirewall 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-03-01-preview' = {
+// ===== FWルール =====
+resource pgFirewall 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2024-08-01' = {
   parent: pgServer
   name: 'allowall'
   properties: {
@@ -53,7 +51,7 @@ resource pgFirewall 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@202
 }
 
 // ===== Cosmos DB アカウント =====
-resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
+resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2025-04-15' = {
   name: cosmosAccountName
   location: location
   kind: 'GlobalDocumentDB'
@@ -75,7 +73,7 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
 }
 
 // ===== Cosmos DB データベース =====
-resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15' = {
+resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2025-04-15' = {
   parent: cosmosAccount
   name: cosmosDbName
   properties: {
@@ -86,7 +84,7 @@ resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15
 }
 
 // ===== Cosmos DB コンテナ =====
-resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
+resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2025-04-15' = {
   parent: cosmosDb
   name: cosmosContainerName
   properties: {
