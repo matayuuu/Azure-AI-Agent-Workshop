@@ -2,3 +2,7 @@ pandas==2.3.1
 psycopg2==2.9.10
 azure-cosmos==4.9.0
 python-dotenv==1.1.1
+
+azure-ai-projects==1.0.0b12
+azure-ai-agents==1.1.0b4 # MCPTool 対応バージョン
+azure-identity==1.23.1
