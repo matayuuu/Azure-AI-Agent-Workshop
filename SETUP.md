@@ -26,6 +26,11 @@
     ```sh
     az login --use-device-code
     ```
+    
+2. 依存関係のインストール
+    ```sh
+    pip install -r ./requirements.txt
+    ```
 
 3. シェルスクリプトの実行
     ```sh

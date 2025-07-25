@@ -1,5 +1,4 @@
 // ==== パラメータ ====
-// PostgreSQL/CosmosDB用
 param location string
 param pgServerName string
 param pgDbName string
