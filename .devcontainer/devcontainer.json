@@ -9,7 +9,12 @@
   "customizations": {
     "vscode": {
       "settings": {},
-      "extensions": ["ms-python.python", "ms-toolsai.jupyter", "ms-azuretools.vscode-bicep"]
+      "extensions": [
+        "ms-python.python", 
+        "ms-toolsai.jupyter", 
+        "ms-azuretools.vscode-bicep",
+        "mathematic.vscode-pdf"
+      ]
     }
   }
 }
