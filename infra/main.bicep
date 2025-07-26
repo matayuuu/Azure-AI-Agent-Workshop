@@ -114,7 +114,7 @@ resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   properties: {
     allowProjectManagement: true
     customSubDomainName: toLower(aiFoundryName)
-    disableLocalAuth: false // ローカル認証を無効化（本番環境では非推奨）
+    disableLocalAuth: true
     publicNetworkAccess: 'Enabled'
     networkAcls: {
       defaultAction: 'Allow'
