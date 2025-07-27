@@ -38,7 +38,12 @@ def to_json(data):
     return json.dumps(data, ensure_ascii=False, default=str)
 
 # --- PostgreSQL Tools ---
-@mcp.tool(description="全カテゴリ一覧を取得")
+@mcp.tool(description="""
+    全カテゴリ一覧を取得します。
+
+    :return: JSON形式でカテゴリの一覧を返します。
+    :rtype: str
+    """)
 async def get_all_categories() -> str:
     conn = await get_conn()
     try:
@@ -47,8 +52,16 @@ async def get_all_categories() -> str:
     finally:
         await conn.close()
 
-@mcp.tool(description="全商品一覧（カテゴリで絞り込み可）")
-async def get_products(category_id: int = None) -> str:
+@mcp.tool(description="""
+    指定カテゴリの全商品一覧を取得します。
+
+    :param category_id (int): 商品カテゴリID（必須）
+    :rtype: str
+
+    :return: JSON形式で商品の一覧を返します。
+    :rtype: str
+    """)
+async def get_products(category_id: int) -> str:
     conn = await get_conn()
     try:
         if category_id:
@@ -59,7 +72,15 @@ async def get_products(category_id: int = None) -> str:
     finally:
         await conn.close()
 
-@mcp.tool(description="特定ユーザーの注文一覧を取得")
+@mcp.tool(description="""
+    特定ユーザーの注文一覧を取得します。
+
+    :param user_id (int): ユーザーID
+    :rtype: str
+
+    :return: JSON形式で注文の一覧を返します。
+    :rtype: str
+    """)
 async def get_orders_by_user(user_id: int) -> str:
     conn = await get_conn()
     try:
@@ -68,7 +89,15 @@ async def get_orders_by_user(user_id: int) -> str:
     finally:
         await conn.close()
 
-@mcp.tool(description="注文詳細を取得")
+@mcp.tool(description="""
+    注文詳細を取得します。
+
+    :param order_id (int): 注文ID
+    :rtype: str
+
+    :return: JSON形式で注文詳細情報を返します。
+    :rtype: str
+    """)
 async def get_order_details(order_id: int) -> str:
     conn = await get_conn()
     try:
@@ -77,7 +106,15 @@ async def get_order_details(order_id: int) -> str:
     finally:
         await conn.close()
 
-@mcp.tool(description="在庫状況を取得")
+@mcp.tool(description="""
+    指定商品の在庫状況を取得します。
+
+    :param product_id (int): 商品ID
+    :rtype: str
+
+    :return: JSON形式で在庫情報を返します。
+    :rtype: str
+    """)
 async def get_inventory(product_id: int) -> str:
     conn = await get_conn()
     try:
@@ -86,7 +123,12 @@ async def get_inventory(product_id: int) -> str:
     finally:
         await conn.close()
 
-@mcp.tool(description="ユーザー一覧を取得")
+@mcp.tool(description="""
+    全ユーザー一覧を取得します。
+
+    :return: JSON形式でユーザーの一覧を返します。
+    :rtype: str
+    """)
 async def get_users() -> str:
     conn = await get_conn()
     try:
@@ -95,7 +137,15 @@ async def get_users() -> str:
     finally:
         await conn.close()
 
-@mcp.tool(description="配送状況を取得")
+@mcp.tool(description="""
+    配送状況を取得します。
+
+    :param order_id (int): 注文ID
+    :rtype: str
+
+    :return: JSON形式で配送状況を返します。
+    :rtype: str
+    """)
 async def get_shipping_status(order_id: int) -> str:
     conn = await get_conn()
     try:
@@ -110,13 +160,23 @@ def get_cosmos_container():
     db = client.get_database_client(COSMOS_DB_NAME)
     return db.get_container_client(COSMOS_CONTAINER_NAME)
 
-@mcp.tool(description="全ツイート件数取得")
+@mcp.tool(description="""
+    全ツイート件数を取得します。
+
+    :return: JSON形式でツイート件数を返します。
+    :rtype: str
+    """)
 async def get_tweet_count() -> str:
     container = get_cosmos_container()
     count = container.query_items("SELECT VALUE COUNT(1) FROM c", enable_cross_partition_query=True)
     return to_json({"count": list(count)[0]})
 
-@mcp.tool(description="ユーザーごとのツイート数ランキング（上位10件）")
+@mcp.tool(description="""
+    ユーザーごとのツイート数ランキング（上位10件）を取得します。
+
+    :return: JSON形式でscreen_nameとtweet_countのリストを返します。
+    :rtype: str
+    """)
 async def get_top_users_by_tweet() -> str:
     container = get_cosmos_container()
     # 必要な情報だけ取得
@@ -132,10 +192,19 @@ async def get_top_users_by_tweet() -> str:
 
 # さらに必要に応じて CosmosDB のパーティションキーや特定フィールドで集計・分析系ツールも追加できます
 
-@mcp.tool(description="指定期間でツイートの多かった商品ランキング（上位10件）")
+@mcp.tool(description="""
+    指定期間でツイートの多かった商品ランキング（上位10件）を取得します。
+
+    :param start_date (str): 集計開始日（YYYY-MM-DD）
+    :param end_date (str): 集計終了日（YYYY-MM-DD）
+    :rtype: str
+
+    :return: JSON形式でproduct_id, product_name, tweet_countのリストを返します。
+    :rtype: str
+    """)
 async def get_top_products_by_tweets_period(
-    start_date: str,  # "YYYY-MM-DD" 形式
-    end_date: str     # "YYYY-MM-DD" 形式
+    start_date: str,
+    end_date: str
 ) -> str:
     container = get_cosmos_container()
     # ISO8601 文字列（例："2025-07-01T00:00:00Z"）に変換

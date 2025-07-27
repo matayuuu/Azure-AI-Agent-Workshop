@@ -4,7 +4,7 @@
 
 2. [Code]ボタンをクリックし、[Codespaces]タブを選択し、[Create Codespace]をクリック
 
-    ![alt text](./images/image-00-01.png)
+    ![alt text](./docs/img/image-00-01.png)
 
     python 3.11 系が使える状態で、環境が立ち上がります。
 
@@ -37,17 +37,20 @@
     今回利用する以下リソースを自動作成します。
     - Azure AI Foundry
     - Azure AI Foundry Project
+        - AOAI Model (GPT-4.1)
     - Azure Database for PostgreSQL 
     - CosmosDB for NoSQL
     ```sh
     bash ./infra/init_setup.sh
     ```
 
+    > ※ もしエラーが発生した場合、AOAI Model の TPM クォータにかかっているか確認ください。
+
 4. シェルスクリプト完了後、 [Azure Portal](https://portal.azure.com/) にアクセスして、「`リソース グループ`」で検索
 
     作成された [**リソースグループ**] を押下し、各リソースが作成できていることを確認
 
-    ![alt text](./images/image-00-02.png)
+    ![alt text](./docs/img/image-00-02.png)
 
 ## 環境変数ファイル（`.env`）の更新
 作成したリソースから情報を取得して、 .env ファイルの値を更新します。
@@ -56,11 +59,11 @@
 
     ※ 以下のように Azure AI ユーザー ロールがログインユーザーに割り当てられていない場合、以下のようにアラートがでますが、[**修正**] ボタンを押下すると自動で権限を割り当ててくれます。
 
-    ![alt text](./images/image-00-03.png)
+    ![alt text](./docs/img/image-00-03.png)
 
 2. [モデル + エンドポイント] > [gpt-4o] を押下。[**ターゲット URI**] を `AZURE_OPENAI_ENDPOINT` の値として、[**キー**] を `AZURE_OPENAI_API_KEY` の値として更新する。
 
-    ![alt text](./images/image-00-04.png)
+    ![alt text](./docs/img/image-00-04.png)
 
 ## （参考）MCP サーバの動作確認
 [MCP Inspentor](https://github.com/modelcontextprotocol/inspector) を用いることで、Web UI 上で MCP サーバの動作確認ができます。
