@@ -13,7 +13,8 @@
         "ms-python.python", 
         "ms-toolsai.jupyter", 
         "ms-azuretools.vscode-bicep",
-        "mathematic.vscode-pdf"
+        "mathematic.vscode-pdf",
+        "george-alisson.html-preview-vscode"
       ]
     }
   }
