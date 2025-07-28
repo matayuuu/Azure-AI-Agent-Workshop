@@ -241,4 +241,4 @@ async def get_top_products_by_tweets_period(
 
 # --- サーバ起動 ---
 if __name__ == "__main__":
-    asyncio.run(mcp.run(transport="http", host="0.0.0.0", port=8000))
+    asyncio.run(mcp.run(transport="sse", host="0.0.0.0", port=8000))

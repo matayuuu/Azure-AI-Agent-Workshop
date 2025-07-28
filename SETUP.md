@@ -44,7 +44,7 @@
     bash ./infra/init_setup.sh
     ```
 
-    > ※ もしエラーが発生した場合、AOAI Model の TPM クォータにかかっているか確認ください。
+    > ※ エラーが発生した場合は、Azure OpenAI モデルの TPM（Tokens Per Minute）クォータ制限に達していないかをご確認ください。
 
 4. シェルスクリプト完了後、 [Azure Portal](https://portal.azure.com/) にアクセスして、「`リソース グループ`」で検索
 
