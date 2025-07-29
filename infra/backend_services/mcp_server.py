@@ -307,64 +307,160 @@ async def get_trending_tags(top_n: int = 10) -> str:
 
 
 
+# @mcp.tool(
+#     name="get_review_spike_products",
+#     description="""
+#         指定期間でレビュー件数が急増・急減した商品を検出します。
+
+#         :param start_date (str): 集計開始日（YYYY-MM-DD）
+#         :param end_date (str): 集計終了日（YYYY-MM-DD）
+#         :param threshold (int, Optional): 急増・急減とみなす件数変動のしきい値。デフォルト5。
+#         :rtype: str
+
+#         :return: JSON形式で商品ごとに増減したレビュー数のリスト。
+#         :rtype: str
+#     """
+# )
+# async def get_review_spike_products(start_date: str, end_date: str, threshold: int = 5) -> str:
+#     container = get_cosmos_container()
+#     # 全件取得して日付で2分割
+#     query = "SELECT c.product_id, c.review_date FROM c"
+#     items = list(container.query_items(query, enable_cross_partition_query=True))
+#     from collections import defaultdict
+#     before = defaultdict(int)
+#     after = defaultdict(int)
+#     for i in items:
+#         d = i.get("review_date")
+#         if not d or not i.get("product_id"): continue
+#         if d < start_date:
+#             before[i["product_id"]] += 1
+#         elif d <= end_date:
+#             after[i["product_id"]] += 1
+#     results = []
+#     for pid in set(list(before.keys()) + list(after.keys())):
+#         diff = after[pid] - before[pid]
+#         if abs(diff) >= threshold:
+#             results.append({"product_id": pid, "diff": diff, "before": before[pid], "after": after[pid]})
+#     return to_json(results)
+
+
+
+# @mcp.tool(
+#     name="count_pos_neg_reviews",
+#     description="""
+#         指定した期間内のポジティブ・ネガティブレビューの件数を集計します。
+
+#         :param start_date (str): 集計開始日（YYYY-MM-DD）
+#         :param end_date (str): 集計終了日（YYYY-MM-DD）
+#         :param product_name (str, Optional): 商品名で絞り込み。未指定の場合は全商品。
+#         :rtype: str
+
+#         :return: JSON形式で {'positive': 件数, 'negative': 件数, 'total': 件数} を返します。
+#     """
+# )
+# async def count_pos_neg_reviews(
+#     start_date: str,
+#     end_date: str,
+#     product_name: Optional[str] = None,
+# ) -> str:
+#     container = get_cosmos_container()
+#     query = "SELECT c.product_id, c.product_name, c.review_date, c.rating FROM c"
+#     items = list(container.query_items(query, enable_cross_partition_query=True))
+#     # フィルタ処理
+#     filtered = []
+#     for i in items:
+#         # 日付・商品名フィルタ
+#         if not i.get("review_date"):
+#             continue
+#         if i["review_date"] < start_date or i["review_date"] > end_date:
+#             continue
+#         if product_name and i.get("product_name") != product_name:
+#             continue
+#         filtered.append(i)
+#     pos = sum(1 for i in filtered if i.get("rating", 0) >= 4)
+#     neg = sum(1 for i in filtered if i.get("rating", 0) <= 2)
+#     total = len(filtered)
+#     return to_json({
+#         "positive": pos,
+#         "negative": neg,
+#         "total": total
+#     })
+
+
+
+# @mcp.tool(
+#     name="get_top_review_comments",
+#     description="""
+#         指定した期間内でポジティブまたはネガティブなレビューコメント上位10件を取得します。
+
+#         :param start_date (str): 集計開始日（YYYY-MM-DD）
+#         :param end_date (str): 集計終了日（YYYY-MM-DD）
+#         :param sentiment (str): "positive" または "negative" を指定
+#         :param product_name (str, Optional): 商品名で絞り込み。未指定の場合は全商品。
+#         :rtype: str
+
+#         :return: JSON形式で {review_date, product_id, product_name, rating, comment} のリストを返します。
+#     """
+# )
+# async def get_top_review_comments(
+#     start_date: str,
+#     end_date: str,
+#     sentiment: str,
+#     product_name: Optional[str] = None,
+# ) -> str:
+#     container = get_cosmos_container()
+#     query = "SELECT c.product_id, c.product_name, c.review_date, c.rating, c.comment FROM c"
+#     items = list(container.query_items(query, enable_cross_partition_query=True))
+#     # フィルタ処理
+#     filtered = []
+#     for i in items:
+#         # 日付・商品名フィルタ
+#         if not i.get("review_date"):
+#             continue
+#         if i["review_date"] < start_date or i["review_date"] > end_date:
+#             continue
+#         if product_name and i.get("product_name") != product_name:
+#             continue
+#         # 感情フィルタ
+#         if sentiment == "positive" and i.get("rating", 0) >= 4:
+#             filtered.append(i)
+#         elif sentiment == "negative" and i.get("rating", 0) <= 2:
+#             filtered.append(i)
+#     # コメントが空のものは除外
+#     filtered = [i for i in filtered if i.get("comment")]
+#     # レビューが新しい順に上位10件
+#     top10 = sorted(filtered, key=lambda x: x["review_date"], reverse=True)[:10]
+#     return to_json([
+#         {
+#             "review_date": i["review_date"],
+#             "product_id": i.get("product_id"),
+#             "product_name": i.get("product_name"),
+#             "rating": i.get("rating"),
+#             "comment": i.get("comment")
+#         } for i in top10
+#     ])
+
+
 @mcp.tool(
-    name="get_review_spike_products",
+    name="get_reviews_by_period_and_product",
     description="""
-        指定期間でレビュー件数が急増・急減した商品を検出します。
-
-        :param start_date (str): 集計開始日（YYYY-MM-DD）
-        :param end_date (str): 集計終了日（YYYY-MM-DD）
-        :param threshold (int, Optional): 急増・急減とみなす件数変動のしきい値。デフォルト5。
-        :rtype: str
-
-        :return: JSON形式で商品ごとに増減したレビュー数のリスト。
-        :rtype: str
-    """
-)
-async def get_review_spike_products(start_date: str, end_date: str, threshold: int = 5) -> str:
-    container = get_cosmos_container()
-    # 全件取得して日付で2分割
-    query = "SELECT c.product_id, c.review_date FROM c"
-    items = list(container.query_items(query, enable_cross_partition_query=True))
-    from collections import defaultdict
-    before = defaultdict(int)
-    after = defaultdict(int)
-    for i in items:
-        d = i.get("review_date")
-        if not d or not i.get("product_id"): continue
-        if d < start_date:
-            before[i["product_id"]] += 1
-        elif d <= end_date:
-            after[i["product_id"]] += 1
-    results = []
-    for pid in set(list(before.keys()) + list(after.keys())):
-        diff = after[pid] - before[pid]
-        if abs(diff) >= threshold:
-            results.append({"product_id": pid, "diff": diff, "before": before[pid], "after": after[pid]})
-    return to_json(results)
-
-
-
-@mcp.tool(
-    name="count_pos_neg_reviews",
-    description="""
-        指定した期間内のポジティブ・ネガティブレビューの件数を集計します。
+        指定した期間内かつ指定商品のレビュー（詳細）一覧を取得します。
 
         :param start_date (str): 集計開始日（YYYY-MM-DD）
         :param end_date (str): 集計終了日（YYYY-MM-DD）
         :param product_name (str, Optional): 商品名で絞り込み。未指定の場合は全商品。
         :rtype: str
 
-        :return: JSON形式で {'positive': 件数, 'negative': 件数, 'total': 件数} を返します。
+        :return: JSON形式で {review_date, product_id, product_name, rating, comment, user_id など} のリストを返します。
     """
 )
-async def count_pos_neg_reviews(
+async def get_reviews_by_period_and_product(
     start_date: str,
     end_date: str,
     product_name: Optional[str] = None,
 ) -> str:
     container = get_cosmos_container()
-    query = "SELECT c.product_id, c.product_name, c.review_date, c.rating FROM c"
+    query = "SELECT c.product_id, c.product_name, c.review_date, c.rating, c.comment, c.user_id FROM c"
     items = list(container.query_items(query, enable_cross_partition_query=True))
     # フィルタ処理
     filtered = []
@@ -377,67 +473,17 @@ async def count_pos_neg_reviews(
         if product_name and i.get("product_name") != product_name:
             continue
         filtered.append(i)
-    pos = sum(1 for i in filtered if i.get("rating", 0) >= 4)
-    neg = sum(1 for i in filtered if i.get("rating", 0) <= 2)
-    total = len(filtered)
-    return to_json({
-        "positive": pos,
-        "negative": neg,
-        "total": total
-    })
-
-
-
-@mcp.tool(
-    name="get_top_review_comments",
-    description="""
-        指定した期間内でポジティブまたはネガティブなレビューコメント上位10件を取得します。
-
-        :param start_date (str): 集計開始日（YYYY-MM-DD）
-        :param end_date (str): 集計終了日（YYYY-MM-DD）
-        :param sentiment (str): "positive" または "negative" を指定
-        :param product_name (str, Optional): 商品名で絞り込み。未指定の場合は全商品。
-        :rtype: str
-
-        :return: JSON形式で {review_date, product_id, product_name, rating, comment} のリストを返します。
-    """
-)
-async def get_top_review_comments(
-    start_date: str,
-    end_date: str,
-    sentiment: str,
-    product_name: Optional[str] = None,
-) -> str:
-    container = get_cosmos_container()
-    query = "SELECT c.product_id, c.product_name, c.review_date, c.rating, c.comment FROM c"
-    items = list(container.query_items(query, enable_cross_partition_query=True))
-    # フィルタ処理
-    filtered = []
-    for i in items:
-        # 日付・商品名フィルタ
-        if not i.get("review_date"):
-            continue
-        if i["review_date"] < start_date or i["review_date"] > end_date:
-            continue
-        if product_name and i.get("product_name") != product_name:
-            continue
-        # 感情フィルタ
-        if sentiment == "positive" and i.get("rating", 0) >= 4:
-            filtered.append(i)
-        elif sentiment == "negative" and i.get("rating", 0) <= 2:
-            filtered.append(i)
-    # コメントが空のものは除外
-    filtered = [i for i in filtered if i.get("comment")]
-    # レビューが新しい順に上位10件
-    top10 = sorted(filtered, key=lambda x: x["review_date"], reverse=True)[:10]
+    # 新しい順（または必要に応じてソート）
+    result = sorted(filtered, key=lambda x: x["review_date"], reverse=True)
     return to_json([
         {
             "review_date": i["review_date"],
             "product_id": i.get("product_id"),
             "product_name": i.get("product_name"),
             "rating": i.get("rating"),
-            "comment": i.get("comment")
-        } for i in top10
+            "comment": i.get("comment"),
+            "user_id": i.get("user_id"),
+        } for i in result
     ])
 
 
