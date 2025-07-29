@@ -12,14 +12,11 @@ from semantic_kernel.functions import kernel_function
 
 load_dotenv(override=True)
 
-PROJECT_ENDPOINT=os.getenv("PROJECT_ENDPOINT")
 AZURE_DEPLOYMENT_NAME=os.getenv("AZURE_DEPLOYMENT_NAME")
 AZURE_OPENAI_ENDPOINT=os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_API_KEY=os.getenv("AZURE_OPENAI_API_KEY")
 
-FOUNDRY_CODE_INTERPRETER_AGENT_ID=os.getenv("FOUNDRY_CODE_INTERPRETER_AGENT_ID")
-FOUNDRY_FILE_SEARCH_AGENT_ID=os.getenv("FOUNDRY_FILE_SEARCH_AGENT_ID")
-
+# プラグインの作成
 class OrderStatusPlugin:
     @kernel_function
     def check_order_status(self, order_id: str) -> str:
@@ -56,56 +53,82 @@ azure_completion_service  = AzureChatCompletion(
 
 
 
-def get_agents() -> tuple[list[Agent], OrchestrationHandoffs]:
-    """ハンドオフオーケストレーションに参加するエージェントのリストとハンドオフ関係を返します。
 
-    エージェントとハンドオフ接続は自由に追加または削除できます。
+support_agent = ChatCompletionAgent(
+    name="TriageAgent",
+    description="問題をトリアージするカスタマーサポートエージェント。",
+    instructions="""
+    顧客のリクエストを処理してください。
+    返金、注文状況、注文返品に関する問題を特定し、適切なエージェントに転送してください。
+    """,
+    service=azure_completion_service,
+)
+
+refund_agent = ChatCompletionAgent(
+    name="RefundAgent",
+    description="返金を処理するカスタマーサポートエージェント。",
+    instructions="""
+    返金リクエストを処理してください。
+    処理が完了したら、他に依頼がないか丁寧に確認して下さい。
+    """,
+    service=azure_completion_service,
+    plugins=[OrderRefundPlugin()],
+)
+
+order_status_agent = ChatCompletionAgent(
+    name="OrderStatusAgent",
+    description="注文状況を確認するカスタマーサポートエージェント。",
+    instructions="""
+    注文状況リクエストを処理してください。
+    処理が完了したら、他に依頼がないか丁寧に確認して下さい。
+    """,
+    service=azure_completion_service,
+    plugins=[OrderStatusPlugin()],
+)
+
+order_return_agent = ChatCompletionAgent(
+    name="OrderReturnAgent",
+    description="注文の返品を処理するカスタマーサポートエージェント。",
+    instructions="""
+    注文返品リクエストを処理してください。
+    処理が完了したら、他に依頼がないか丁寧に確認して下さい。
+    """,
+    service=azure_completion_service,
+    plugins=[OrderReturnPlugin()],
+)
+
+
+def agent_response_callback(message: ChatMessageContent) -> None:
+    """エージェントからのメッセージを表示するオブザーバー関数。
+
+    この関数は、エージェントが応答を生成するたびに呼び出されることに注意してください。
+    これには、オーケストレーション内の他のエージェントには見えない内部処理メッセージ
+    （ツール呼び出しなど）も含まれます。
     """
-    
-    support_agent = ChatCompletionAgent(
-        name="TriageAgent",
-        description="問題をトリアージするカスタマーサポートエージェント。",
-        instructions="""
-        顧客のリクエストを処理してください。
-        返金、注文状況、注文返品に関する問題を特定し、適切なエージェントに転送してください。
-        """,
-        service=azure_completion_service,
-    )
+    print(f"{message.name}: {message.content}")
+    for item in message.items:
+        if isinstance(item, FunctionCallContent):
+            print(f"'{item.name}' を引数 '{item.arguments}' で呼び出し中")
+        if isinstance(item, FunctionResultContent):
+            print(f"'{item.name}' からの結果: '{item.result}'")
 
-    refund_agent = ChatCompletionAgent(
-        name="RefundAgent",
-        description="返金を処理するカスタマーサポートエージェント。",
-        instructions="""
-        返金リクエストを処理してください。
-        処理が完了したら、他に依頼がないか丁寧に確認して下さい。
-        """,
-        service=azure_completion_service,
-        plugins=[OrderRefundPlugin()],
-    )
 
-    order_status_agent = ChatCompletionAgent(
-        name="OrderStatusAgent",
-        description="注文状況を確認するカスタマーサポートエージェント。",
-        instructions="""
-        注文状況リクエストを処理してください。
-        処理が完了したら、他に依頼がないか丁寧に確認して下さい。
-        """,
-        service=azure_completion_service,
-        plugins=[OrderStatusPlugin()],
-    )
+def human_response_function() -> ChatMessageContent:
+    """エージェントからのメッセージを表示するオブザーバー関数。"""
+    user_input = input("ユーザー: ")
+    return ChatMessageContent(role=AuthorRole.USER, content=user_input)
 
-    order_return_agent = ChatCompletionAgent(
-        name="OrderReturnAgent",
-        description="注文の返品を処理するカスタマーサポートエージェント。",
-        instructions="""
-        注文返品リクエストを処理してください。
-        処理が完了したら、他に依頼がないか丁寧に確認して下さい。
-        """,
-        service=azure_completion_service,
-        plugins=[OrderReturnPlugin()],
-    )
 
-    # エージェント間のハンドオフ関係を定義
+async def main():
+    """エージェントを実行するメイン関数。"""
+    # 1. 複数エージェントの定義
+    agents = [
+        support_agent, 
+        refund_agent, 
+        order_status_agent, 
+        order_return_agent
+    ]
+    # 2. ハンドオフの定義
     handoffs = (
         OrchestrationHandoffs()
         .add_many(
@@ -132,35 +155,7 @@ def get_agents() -> tuple[list[Agent], OrchestrationHandoffs]:
             description="問題が注文返品関連でない場合、このエージェントに転送してください",
         )
     )
-
-    return [support_agent, refund_agent, order_status_agent, order_return_agent], handoffs
-
-
-def agent_response_callback(message: ChatMessageContent) -> None:
-    """エージェントからのメッセージを表示するオブザーバー関数。
-
-    この関数は、エージェントが応答を生成するたびに呼び出されることに注意してください。
-    これには、オーケストレーション内の他のエージェントには見えない内部処理メッセージ
-    （ツール呼び出しなど）も含まれます。
-    """
-    print(f"{message.name}: {message.content}")
-    for item in message.items:
-        if isinstance(item, FunctionCallContent):
-            print(f"'{item.name}' を引数 '{item.arguments}' で呼び出し中")
-        if isinstance(item, FunctionResultContent):
-            print(f"'{item.name}' からの結果: '{item.result}'")
-
-
-def human_response_function() -> ChatMessageContent:
-    """エージェントからのメッセージを表示するオブザーバー関数。"""
-    user_input = input("ユーザー: ")
-    return ChatMessageContent(role=AuthorRole.USER, content=user_input)
-
-
-async def main():
-    """エージェントを実行するメイン関数。"""
-    # 1. 複数のエージェントでハンドオフオーケストレーションを作成
-    agents, handoffs = get_agents()
+    # 3. ハンドオフ・オーケストレーション作成
     handoff_orchestration = HandoffOrchestration(
         members=agents,
         handoffs=handoffs,
@@ -168,21 +163,21 @@ async def main():
         human_response_function=human_response_function,
     )
 
-    # 2. ランタイムを作成して開始
+    # 4. ランタイムを作成して開始
     runtime = InProcessRuntime()
     runtime.start()
 
-    # 3. タスクとランタイムでオーケストレーションを呼び出し
+    # 5. タスクとランタイムでオーケストレーションを呼び出し
     orchestration_result = await handoff_orchestration.invoke(
         task="サポートを求めている顧客に挨拶してください。",
         runtime=runtime,
     )
 
-    # 4. 結果を待機
+    # 6. 結果を待機
     value = await orchestration_result.get()
     print(value)
 
-    # 5. 呼び出し完了後にランタイムを停止
+    # 7. 呼び出し完了後にランタイムを停止
     await runtime.stop_when_idle()
 
     """
