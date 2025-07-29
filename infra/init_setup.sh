@@ -94,10 +94,10 @@ update_env "COSMOS_CONTAINER" "$COSMOS_CONTAINER_NAME"
 
 # ==== DB へデータ投入 ====
 echo "# --- PostgreSQL テーブル作成＆CSV投入 ---"
-python ./infra/import_to_db_scripts/import_csv_to_postgres.py "$PG_HOST" "$PG_DB_NAME" "$PG_ADMIN_USER" "$PG_ADMIN_PASS" "./infra/sample_data/csv"
+python ./infra/import_to_db_scripts/import_csv_to_postgres.py "$PG_HOST" "$PG_DB_NAME" "$PG_ADMIN_USER" "$PG_ADMIN_PASS" "./infra/sample_data/to_postgresql/csv"
 
 echo "# --- Cosmos DB (NoSQL) へtweets.json投入 ---"
-python ./infra/import_to_db_scripts/import_jsonl_to_cosmos.py "$COSMOS_URI" "$COSMOS_KEY" "$COSMOS_DB_NAME" "$COSMOS_CONTAINER_NAME" "./infra/sample_data/jsonl"
+python ./infra/import_to_db_scripts/import_jsonl_to_cosmos.py "$COSMOS_URI" "$COSMOS_KEY" "$COSMOS_DB_NAME" "$COSMOS_CONTAINER_NAME" "./infra/sample_data/to_cosmosdb/jsonl"
 
 echo "done"
 echo "== 準備完了！=="

@@ -11,3 +11,5 @@ semantic-kernel==1.35.0
 
 asyncpg==0.30.0
 fastmcp==2.10.6
+
+azure-mgmt-resource==24.0.0
