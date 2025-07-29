@@ -1,4 +1,0 @@
-fastmcp
-asyncpg
-python-dotenv
-azure-cosmos

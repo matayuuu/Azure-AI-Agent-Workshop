@@ -15,12 +15,6 @@
     az --version
     ```
 
-
-## （仮）ディレクトリの構造について
-今回のハンズオンのディレクトリ構造は下記の通りです。
-```sh
-```
-
 ## インフラ構築
 1. Azure へのログイン
     ```sh
@@ -65,11 +59,19 @@
 
     ![alt text](./docs/img/image-00-04.png)
 
-## （参考）MCP サーバの動作確認
-[MCP Inspentor](https://github.com/modelcontextprotocol/inspector) を用いることで、Web UI 上で MCP サーバの動作確認ができます。
+## MCP サーバ起動
+1. ターミナルウィンドウで、MCP サーバーを実行します。
+    ```sh
+    python .\infra\backend_services\mcp_server.py 
+    # このターミナルを閉じてはいけません。次の手順のために別のターミナルを開いてください。
+    ```
 
-以下のコマンドを実行すると Web UI がローカルホストに起動します。
 
-```sh
-npx @modelcontextprotocol/inspector
-```
+2. （参考）MCP サーバの動作確認
+
+    [MCP Inspentor](https://github.com/modelcontextprotocol/inspector) を用いることで、Web UI 上で MCP サーバの動作確認ができます。
+    別タブを開いて、以下のコマンドを実行すると Web UI がローカルホストに起動します。
+
+    ```sh
+    npx @modelcontextprotocol/inspector
+    ```
