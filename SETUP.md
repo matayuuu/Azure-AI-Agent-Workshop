@@ -123,23 +123,12 @@ Model Context Protocol（MCP）サーバーを起動して、エージェント�
 新しいターミナルウィンドウで以下のコマンドを実行：
 
 ```bash
-python .\infra\backend_services\mcp_server.py
+python ./infra/backend_services/mcp_server.py
 ```
 
 > **重要**: このターミナルは閉じないでください。MCPサーバーが継続実行される必要があります。
 
 > **ヒント**: 新しい作業用ターミナルを別途開いてください。
-
-### 4.2 MCP サーバーの動作確認（オプション）
-
-[MCP Inspector](https://github.com/modelcontextprotocol/inspector) を使用してWeb UIでサーバーの動作を確認できます：
-
-```bash
-# 新しいターミナルタブで実行
-npx @modelcontextprotocol/inspector
-```
-
-> **結果**: ローカルホストにWeb UIが起動し、MCPサーバーの状態を確認可能
 
 
 ## 次のステップ
