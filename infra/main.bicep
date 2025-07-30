@@ -140,7 +140,7 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
   parent: aiFoundry
   name: aiModelDeploymentName
   sku : {
-    capacity: 35
+    capacity: 45
     name: 'GlobalStandard'
   }
   properties: {
