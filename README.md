@@ -11,7 +11,7 @@ Azure 上で AI エージェントの開発手法を学ぶための実践的な�
 - **データベース統合**: PostgreSQLとCosmosDBとの連携
 - **Model Context Protocol (MCP)**: エージェント間の標準化された通信
 
-## 🚀 クイックスタート
+## クイックスタート
 
 ### 前提条件
 
