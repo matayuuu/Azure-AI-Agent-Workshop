@@ -1,27 +1,19 @@
 # Azure AI Agent Workshop
 
-Azure 上で AI エージェントの開発手法を学ぶための実践的なワークショップです。Azure AI Foundry Agent ServiceとSemantic Kernelを使用して、高度なAIエージェントアプリケーションの構築方法を学習できます。
+Azure 上で AI エージェントの開発手法を学ぶための実践的なワークショップです。Azure AI Foundry Agent Service と Semantic Kernel を使用して、高度な AI エージェントアプリケーションの構築方法を学習できます。
 
-## 概要
-
-このワークショップでは、以下の技術とコンセプトを学習します：
-- **Azure AI Foundry Agent Service**: Azureクラウドでのエージェント開発
-- **Semantic Kernel**: マイクロソフトのAIオーケストレーションフレームワーク
-- **マルチエージェントシステム**: 複数のAIエージェントによる協調処理
-- **データベース統合**: PostgreSQLとCosmosDBとの連携
-- **Model Context Protocol (MCP)**: エージェント間の標準化された通信
 
 ## クイックスタート
 
 ### 前提条件
 
 - Azureサブスクリプション
-- GitHub Codespaces環境（推奨）またはPython 3.11+
+- GitHub Codespaces環境（推奨）または Python 3.11+
 - Azure CLI
 
 ### セットアップ
 
-詳細なセットアップ手順は [SETUP.md](./SETUP.md) をご確認ください。
+環境構築手順は [SETUP.md](./SETUP.md) をご確認ください。
 
 ## 学習コンテンツ
 
@@ -29,28 +21,28 @@ Azure 上で AI エージェントの開発手法を学ぶための実践的な�
 
 Azure AI Foundryを使用したエージェント開発の基礎を学習します。
 
-| ノートブック | 内容 | 学習項目 |
-|-------------|------|---------|
-| `01_single_agent_custom_functions.ipynb` | カスタム関数エージェント | 関数呼び出し、ツール統合 |
-| `02_single_agent_code_interpreter.ipynb` | コードインタープリター | Python実行、データ分析 |
-| `03_single_agent_file_search.ipynb` | ファイル検索エージェント | ファイル処理、検索機能 |
-| `04_single_agent_mcp.ipynb` | MCPエージェント | Model Context Protocol |
-| `05_connected_agents.ipynb` | Connected エージェント | エージェント間連携 |
+| ノートブック | 内容 |
+|-------------|------|
+| `01_single_agent_custom_functions.ipynb` | カスタム関数エージェントを用いた関数呼び出し |
+| `02_single_agent_code_interpreter.ipynb` | コードインタープリターエージェントを用いたデータ分析・可視化 |
+| `03_single_agent_file_search.ipynb` | ファイル検索エージェント RAG の実装 |
+| `04_single_agent_mcp.ipynb` | MCP をツールとして利用するエージェント |
+| `05_connected_agents.ipynb` | Connected Agents によるエージェント間連携 |
 
 ### 02. Semantic Kernel
 
 Semantic Kernelを使用した高度なマルチエージェントシステムを構築します。
 
-| ノートブック | 内容 | 学習項目 |
-|-------------|------|---------|
-| `01_single_agent_chat_completion.ipynb` | Chat Completion API で作るシングルエージェント | SK基礎、プロンプト管理 |
-| `02_single_agent_azure_ai.ipynb` | Azure AI Foundry 統合 | Azure AIサービス連携 |
-| `03_plugin_agents.ipynb` | プラグインエージェント | プラグイン開発、拡張性 |
-| `04_handoffs_terminal.py` | ハンドオフシステム | エージェント移譲 |
-| `05_group_chat.ipynb` | グループチャット | 複数エージェント対話 |
-| `06_group_chat_custom.ipynb` | カスタムグループチャット | 高度な制御フロー |
-| `07_magentic.ipynb` | Magentic | 自動制御、DB統合 |
-| `08_process_framework_simple.ipynb` | プロセスフレームワーク | ワークフロー自動化 |
+| ノートブック | 内容 |
+|-------------|------|
+| `01_single_agent_chat_completion.ipynb` | Chat Completion API で作るシングルエージェント |
+| `02_single_agent_azure_ai.ipynb` | Semantic Kernel で Azure AI Foundry Agent Service 上のエージェントを操作する |
+| `03_plugin_agents.ipynb` | エージェントをプラグインとして統合しエージェント間連携を実装 |
+| `04_handoffs_terminal.py` | 会話の流れに応じて動的に移譲するハンズオフ・オーケストレーション |
+| `05_group_chat.ipynb` | 柔軟なマルチエージェントオーケストレーションを実現するグループチャット・オーケストレーションの入門 |
+| `06_group_chat_custom.ipynb` | グループチャット・オーケストレーションの中級編、カスタムグループチャットによる協調連携の柔軟な制御 |
+| `07_magentic.ipynb` | 高度なマルチエージェント・オーケストレーションである Magentic で Text-to-SQL を実装 |
+| `08_process_framework_simple.ipynb` | ワークフローを自動化するプロセスフレームワークの紹介 |
 
 
 ## 技術スタック
